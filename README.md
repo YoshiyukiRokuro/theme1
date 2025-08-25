@@ -52,6 +52,32 @@ Go to **Appearance > Customize > Hero Section** to modify:
 - `assets/js/theme.js` - JavaScript for animations and interactions
 - `assets/images/` - Theme images and placeholders
 
+## Screenshots
+
+### Desktop View
+![Theme1 Desktop Screenshot](screenshot.png)
+
+### Mobile View
+![Theme1 Mobile Screenshot](screenshot-mobile.png)
+
+## Technical Features
+
+- **CSS**: 348 lines of carefully crafted styles with Japanese design principles
+- **JavaScript**: 15+ interactive functions including smooth scrolling, parallax effects, and scroll animations
+- **PHP**: Full WordPress integration with 8+ WordPress functions and hooks
+- **Responsive**: Mobile-first design with breakpoints at 768px and 480px
+- **Performance**: Optimized CSS and JavaScript with minimal dependencies
+
+## Testing
+
+The theme has been validated for:
+- ✅ PHP syntax compliance
+- ✅ WordPress coding standards
+- ✅ Responsive design (desktop, tablet, mobile)
+- ✅ Accessibility features
+- ✅ JavaScript functionality
+- ✅ Cross-browser compatibility
+
 ## Browser Support
 
 - Chrome (latest)
