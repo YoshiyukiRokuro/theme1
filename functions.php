@@ -53,6 +53,39 @@ function theme1_widgets_init() {
         'before_title'  => '<h2 class="widget-title">',
         'after_title'   => '</h2>',
     ));
+    
+    // Page widgets area
+    register_sidebar(array(
+        'name'          => __('Page Sidebar', 'theme1'),
+        'id'            => 'page-sidebar',
+        'description'   => __('Widget area for pages.', 'theme1'),
+        'before_widget' => '<section id="%1$s" class="widget %2$s">',
+        'after_widget'  => '</section>',
+        'before_title'  => '<h2 class="widget-title">',
+        'after_title'   => '</h2>',
+    ));
+    
+    // Post widgets area
+    register_sidebar(array(
+        'name'          => __('Post Sidebar', 'theme1'),
+        'id'            => 'post-sidebar',
+        'description'   => __('Widget area for posts.', 'theme1'),
+        'before_widget' => '<section id="%1$s" class="widget %2$s">',
+        'after_widget'  => '</section>',
+        'before_title'  => '<h2 class="widget-title">',
+        'after_title'   => '</h2>',
+    ));
+    
+    // Footer widgets
+    register_sidebar(array(
+        'name'          => __('Footer Widgets', 'theme1'),
+        'id'            => 'footer-widgets',
+        'description'   => __('Widget area for footer section.', 'theme1'),
+        'before_widget' => '<section id="%1$s" class="widget %2$s">',
+        'after_widget'  => '</section>',
+        'before_title'  => '<h3 class="widget-title">',
+        'after_title'   => '</h3>',
+    ));
 }
 add_action('widgets_init', 'theme1_widgets_init');
 
@@ -89,10 +122,70 @@ function theme1_customize_register($wp_customize) {
     ));
     
     $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'hero_background_image', array(
-        'label'    => __('Hero Background Image', 'theme1'),
+        'label'    => __('Hero Background Image 1', 'theme1'),
         'section'  => 'hero_image_section',
         'settings' => 'hero_background_image',
     )));
+    
+    // Hero Image 2
+    $wp_customize->add_setting('hero_background_image_2', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    
+    $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'hero_background_image_2', array(
+        'label'    => __('Hero Background Image 2', 'theme1'),
+        'section'  => 'hero_image_section',
+        'settings' => 'hero_background_image_2',
+    )));
+    
+    // Hero Image 3
+    $wp_customize->add_setting('hero_background_image_3', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    
+    $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'hero_background_image_3', array(
+        'label'    => __('Hero Background Image 3', 'theme1'),
+        'section'  => 'hero_image_section',
+        'settings' => 'hero_background_image_3',
+    )));
+    
+    // Slideshow Settings
+    $wp_customize->add_section('hero_slideshow_section', array(
+        'title'       => __('Hero Slideshow Settings', 'theme1'),
+        'panel'       => 'hero_panel',
+        'priority'    => 15,
+    ));
+    
+    // Enable slideshow
+    $wp_customize->add_setting('hero_slideshow_enable', array(
+        'default'           => false,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    
+    $wp_customize->add_control('hero_slideshow_enable', array(
+        'label'    => __('Enable Slideshow', 'theme1'),
+        'section'  => 'hero_slideshow_section',
+        'type'     => 'checkbox',
+    ));
+    
+    // Slideshow transition time
+    $wp_customize->add_setting('hero_slideshow_speed', array(
+        'default'           => 5000,
+        'sanitize_callback' => 'absint',
+    ));
+    
+    $wp_customize->add_control('hero_slideshow_speed', array(
+        'label'       => __('Slideshow Speed (milliseconds)', 'theme1'),
+        'section'     => 'hero_slideshow_section',
+        'type'        => 'number',
+        'input_attrs' => array(
+            'min'  => 1000,
+            'max'  => 10000,
+            'step' => 500,
+        ),
+    ));
     
     // Hero Content Section
     $wp_customize->add_section('hero_content_section', array(
@@ -315,12 +408,26 @@ add_action('customize_register', 'theme1_customize_register');
  * Get hero section data
  */
 function theme1_get_hero_data() {
+    $images = array();
+    
+    // Collect all hero images
+    for ($i = 1; $i <= 3; $i++) {
+        $image_key = $i === 1 ? 'hero_background_image' : 'hero_background_image_' . $i;
+        $image_url = get_theme_mod($image_key, '');
+        if (!empty($image_url)) {
+            $images[] = $image_url;
+        }
+    }
+    
     return array(
-        'background_image' => get_theme_mod('hero_background_image', ''),
-        'title'            => get_theme_mod('hero_title', __('Welcome to Our Site', 'theme1')),
-        'subtitle'         => get_theme_mod('hero_subtitle', __('Discover the beauty of Japanese design and culture', 'theme1')),
-        'cta_text'         => get_theme_mod('hero_cta_text', __('Learn More', 'theme1')),
-        'cta_url'          => get_theme_mod('hero_cta_url', '#about'),
+        'background_image'   => get_theme_mod('hero_background_image', ''),
+        'background_images'  => $images,
+        'slideshow_enable'   => get_theme_mod('hero_slideshow_enable', false),
+        'slideshow_speed'    => get_theme_mod('hero_slideshow_speed', 5000),
+        'title'              => get_theme_mod('hero_title', __('Welcome to Our Site', 'theme1')),
+        'subtitle'           => get_theme_mod('hero_subtitle', __('Discover the beauty of Japanese design and culture', 'theme1')),
+        'cta_text'           => get_theme_mod('hero_cta_text', __('Learn More', 'theme1')),
+        'cta_url'            => get_theme_mod('hero_cta_url', '#about'),
     );
 }
 

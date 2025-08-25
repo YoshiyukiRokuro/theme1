@@ -23,6 +23,12 @@
                     } else {
                         echo '<h1 class="site-title"><a href="' . esc_url(home_url('/')) . '" rel="home">' . get_bloginfo('name') . '</a></h1>';
                     }
+                    
+                    // Display tagline prominently
+                    $description = get_bloginfo('description', 'display');
+                    if ($description || is_customize_preview()) {
+                        echo '<p class="site-description">' . $description . '</p>';
+                    }
                     ?>
                 </div>
                 
