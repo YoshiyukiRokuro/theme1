@@ -418,6 +418,38 @@ function theme1_customize_register($wp_customize) {
         'section'  => 'contact_content_section',
         'type'     => 'textarea',
     ));
+
+    // Menu Icons Section
+    $wp_customize->add_section('menu_icons_section', array(
+        'title'       => __('Menu Icons', 'theme1'),
+        'description' => __('Upload icons for your menu items. Icons will appear next to menu text.', 'theme1'),
+        'priority'    => 60,
+    ));
+
+    // Get menu items to create controls for them
+    $menu_locations = get_nav_menu_locations();
+    if (isset($menu_locations['primary'])) {
+        $menu = wp_get_nav_menu_object($menu_locations['primary']);
+        if ($menu) {
+            $menu_items = wp_get_nav_menu_items($menu->term_id);
+            if ($menu_items) {
+                foreach ($menu_items as $menu_item) {
+                    // Menu icon setting
+                    $wp_customize->add_setting('menu_icon_' . $menu_item->ID, array(
+                        'default'           => '',
+                        'sanitize_callback' => 'esc_url_raw',
+                    ));
+
+                    // Menu icon control
+                    $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'menu_icon_' . $menu_item->ID, array(
+                        'label'    => sprintf(__('Icon for "%s"', 'theme1'), $menu_item->title),
+                        'section'  => 'menu_icons_section',
+                        'settings' => 'menu_icon_' . $menu_item->ID,
+                    )));
+                }
+            }
+        }
+    }
 }
 add_action('customize_register', 'theme1_customize_register');
 
@@ -510,3 +542,45 @@ function theme1_body_classes($classes) {
     return $classes;
 }
 add_filter('body_class', 'theme1_body_classes');
+
+/**
+ * Custom Navigation Walker for Menu Icons
+ */
+class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
+    
+    function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
+        $indent = ($depth) ? str_repeat("\t", $depth) : '';
+
+        $classes = empty($item->classes) ? array() : (array) $item->classes;
+        $classes[] = 'menu-item-' . $item->ID;
+
+        $class_names = join(' ', apply_filters('nav_menu_css_class', array_filter($classes), $item, $args));
+        $class_names = $class_names ? ' class="' . esc_attr($class_names) . '"' : '';
+
+        $id = apply_filters('nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args);
+        $id = $id ? ' id="' . esc_attr($id) . '"' : '';
+
+        $attributes  = ! empty($item->attr_title) ? ' title="'  . esc_attr($item->attr_title) .'"' : '';
+        $attributes .= ! empty($item->target)     ? ' target="' . esc_attr($item->target     ) .'"' : '';
+        $attributes .= ! empty($item->xfn)        ? ' rel="'    . esc_attr($item->xfn        ) .'"' : '';
+        $attributes .= ! empty($item->url)        ? ' href="'   . esc_attr($item->url        ) .'"' : '';
+
+        // Get menu icon from theme mod
+        $menu_icon = get_theme_mod('menu_icon_' . $item->ID, '');
+        $icon_html = '';
+        
+        if (!empty($menu_icon)) {
+            $icon_html = '<img src="' . esc_url($menu_icon) . '" alt="" class="menu-icon" />';
+        }
+
+        $item_output = isset($args->before) ? $args->before : '';
+        $item_output .= '<a' . $attributes . '>';
+        $item_output .= $icon_html;
+        $item_output .= (isset($args->link_before) ? $args->link_before : '') . apply_filters('the_title', $item->title, $item->ID) . (isset($args->link_after) ? $args->link_after : '');
+        $item_output .= '</a>';
+        $item_output .= isset($args->after) ? $args->after : '';
+
+        $output .= $indent . '<li' . $id . $class_names .'>' . "\n";
+        $output .= $indent . "\t" . $item_output . "\n";
+    }
+}
