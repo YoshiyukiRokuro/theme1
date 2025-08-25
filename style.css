@@ -414,6 +414,20 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 2rem;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .header-content {
         flex-direction: row;
@@ -491,6 +505,30 @@ body {
     
     .contact-info {
         grid-template-columns: 1fr;
+    }
+    
+    /* Content area responsive */
+    .content-area {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .page-sidebar,
+    .post-sidebar {
+        position: static;
+    }
+    
+    .content-area .entry-title {
+        font-size: 2rem;
+    }
+    
+    .content-area .entry-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .post-navigation .nav-links {
+        flex-direction: column;
     }
 }
 
@@ -753,32 +791,6 @@ textarea:focus {
 
 .post-navigation a:hover .nav-title {
     color: #8b4513;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .content-area {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .page-sidebar,
-    .post-sidebar {
-        position: static;
-    }
-    
-    .content-area .entry-title {
-        font-size: 2rem;
-    }
-    
-    .content-area .entry-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .post-navigation .nav-links {
-        flex-direction: column;
-    }
 }
 
 /* Footer Widgets */
