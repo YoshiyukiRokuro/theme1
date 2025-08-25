@@ -66,56 +66,9 @@ $hero_data = theme1_get_hero_data();
 </section>
 
 <!-- About Section -->
-<section id="about" class="about-section section">
-    <div class="container">
-        <h2 class="section-title"><?php _e('About Us', 'theme1'); ?></h2>
-        <div class="about-content">
-            <div class="about-text">
-                <p><?php _e('We are inspired by the timeless beauty and simplicity of Japanese design. Our approach emphasizes clean lines, thoughtful spacing, and a harmonious balance between tradition and modernity.', 'theme1'); ?></p>
-                <p><?php _e('Through careful attention to detail and respect for minimalist principles, we create experiences that resonate with tranquility and elegance.', 'theme1'); ?></p>
-            </div>
-            <div class="about-image">
-                <img src="<?php echo get_template_directory_uri(); ?>/assets/images/placeholder-about.jpg" alt="<?php _e('About us image', 'theme1'); ?>" />
-            </div>
-        </div>
-    </div>
-</section>
+<?php get_template_part('template-parts/about-section'); ?>
 
 <!-- Contact/Access Section -->
-<section id="contact" class="contact-section section">
-    <div class="container">
-        <h2 class="section-title"><?php _e('Contact & Access', 'theme1'); ?></h2>
-        <p class="section-subtitle"><?php _e('Get in touch with us or visit our location', 'theme1'); ?></p>
-        
-        <div class="contact-info">
-            <div class="contact-item">
-                <h3><?php _e('Address', 'theme1'); ?></h3>
-                <p>
-                    <?php _e('123 Japanese Street', 'theme1'); ?><br>
-                    <?php _e('Design District', 'theme1'); ?><br>
-                    <?php _e('Tokyo, Japan 100-0001', 'theme1'); ?>
-                </p>
-            </div>
-            
-            <div class="contact-item">
-                <h3><?php _e('Contact Information', 'theme1'); ?></h3>
-                <p>
-                    <?php _e('Phone: +81-3-1234-5678', 'theme1'); ?><br>
-                    <?php _e('Email: info@theme1.com', 'theme1'); ?><br>
-                    <?php _e('Hours: 9:00 AM - 6:00 PM', 'theme1'); ?>
-                </p>
-            </div>
-            
-            <div class="contact-item">
-                <h3><?php _e('Access', 'theme1'); ?></h3>
-                <p>
-                    <?php _e('5 minutes walk from Station A', 'theme1'); ?><br>
-                    <?php _e('3 minutes walk from Station B', 'theme1'); ?><br>
-                    <?php _e('Parking available nearby', 'theme1'); ?>
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
+<?php get_template_part('template-parts/contact-section'); ?>
 
 <?php get_footer(); ?>
