@@ -32,6 +32,16 @@
                     ?>
                 </div>
                 
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+                    <span class="screen-reader-text"><?php _e('Menu', 'theme1'); ?></span>
+                    <span class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+                
                 <nav id="site-navigation" class="main-navigation">
                     <?php
                     wp_nav_menu(array(

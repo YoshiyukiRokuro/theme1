@@ -15,6 +15,7 @@ $hero_data = theme1_get_hero_data();
     <?php if ($hero_data['slideshow_enable'] && count($hero_data['background_images']) > 1) : ?>
         data-slideshow="true" 
         data-speed="<?php echo esc_attr($hero_data['slideshow_speed']); ?>"
+        data-transition="<?php echo esc_attr($hero_data['slideshow_transition']); ?>"
         data-images="<?php echo esc_attr(json_encode($hero_data['background_images'])); ?>"
     <?php else : ?>
         style="<?php echo $hero_data['background_image'] ? 'background-image: url(' . esc_url($hero_data['background_image']) . ');' : ''; ?>"

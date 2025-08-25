@@ -187,6 +187,23 @@ function theme1_customize_register($wp_customize) {
         ),
     ));
     
+    // Slideshow transition type
+    $wp_customize->add_setting('hero_slideshow_transition', array(
+        'default'           => 'fade',
+        'sanitize_callback' => 'theme1_sanitize_slideshow_transition',
+    ));
+    
+    $wp_customize->add_control('hero_slideshow_transition', array(
+        'label'   => __('Transition Effect', 'theme1'),
+        'section' => 'hero_slideshow_section',
+        'type'    => 'select',
+        'choices' => array(
+            'fade'  => __('Fade', 'theme1'),
+            'slide' => __('Slide', 'theme1'),
+            'none'  => __('None (Instant)', 'theme1'),
+        ),
+    ));
+    
     // Hero Content Section
     $wp_customize->add_section('hero_content_section', array(
         'title'       => __('Hero Content', 'theme1'),
@@ -420,14 +437,15 @@ function theme1_get_hero_data() {
     }
     
     return array(
-        'background_image'   => get_theme_mod('hero_background_image', ''),
-        'background_images'  => $images,
-        'slideshow_enable'   => get_theme_mod('hero_slideshow_enable', false),
-        'slideshow_speed'    => get_theme_mod('hero_slideshow_speed', 5000),
-        'title'              => get_theme_mod('hero_title', __('Welcome to Our Site', 'theme1')),
-        'subtitle'           => get_theme_mod('hero_subtitle', __('Discover the beauty of Japanese design and culture', 'theme1')),
-        'cta_text'           => get_theme_mod('hero_cta_text', __('Learn More', 'theme1')),
-        'cta_url'            => get_theme_mod('hero_cta_url', '#about'),
+        'background_image'       => get_theme_mod('hero_background_image', ''),
+        'background_images'      => $images,
+        'slideshow_enable'       => get_theme_mod('hero_slideshow_enable', false),
+        'slideshow_speed'        => get_theme_mod('hero_slideshow_speed', 5000),
+        'slideshow_transition'   => get_theme_mod('hero_slideshow_transition', 'fade'),
+        'title'                  => get_theme_mod('hero_title', __('Welcome to Our Site', 'theme1')),
+        'subtitle'               => get_theme_mod('hero_subtitle', __('Discover the beauty of Japanese design and culture', 'theme1')),
+        'cta_text'               => get_theme_mod('hero_cta_text', __('Learn More', 'theme1')),
+        'cta_url'                => get_theme_mod('hero_cta_url', '#about'),
     );
 }
 
@@ -473,6 +491,14 @@ function theme1_excerpt_more($more) {
     return '...';
 }
 add_filter('excerpt_more', 'theme1_excerpt_more');
+
+/**
+ * Sanitize slideshow transition selection
+ */
+function theme1_sanitize_slideshow_transition($input) {
+    $valid_transitions = array('fade', 'slide', 'none');
+    return in_array($input, $valid_transitions) ? $input : 'fade';
+}
 
 /**
  * Add custom body classes
