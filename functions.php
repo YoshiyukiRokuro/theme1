@@ -428,27 +428,48 @@ function theme1_customize_register($wp_customize) {
 
     // Get menu items to create controls for them
     $menu_locations = get_nav_menu_locations();
-    if (isset($menu_locations['primary'])) {
+    if (isset($menu_locations['primary']) && !empty($menu_locations['primary'])) {
         $menu = wp_get_nav_menu_object($menu_locations['primary']);
         if ($menu) {
             $menu_items = wp_get_nav_menu_items($menu->term_id);
-            if ($menu_items) {
+            if ($menu_items && !is_wp_error($menu_items)) {
                 foreach ($menu_items as $menu_item) {
-                    // Menu icon setting
-                    $wp_customize->add_setting('menu_icon_' . $menu_item->ID, array(
-                        'default'           => '',
-                        'sanitize_callback' => 'esc_url_raw',
-                    ));
+                    if ($menu_item->menu_item_parent == 0) { // Only top-level items for simplicity
+                        // Menu icon setting
+                        $wp_customize->add_setting('menu_icon_' . $menu_item->ID, array(
+                            'default'           => '',
+                            'sanitize_callback' => 'esc_url_raw',
+                        ));
 
-                    // Menu icon control
-                    $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'menu_icon_' . $menu_item->ID, array(
-                        'label'    => sprintf(__('Icon for "%s"', 'theme1'), $menu_item->title),
-                        'section'  => 'menu_icons_section',
-                        'settings' => 'menu_icon_' . $menu_item->ID,
-                    )));
+                        // Menu icon control
+                        $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'menu_icon_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('Icon for "%s"', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'settings' => 'menu_icon_' . $menu_item->ID,
+                        )));
+                    }
                 }
             }
         }
+    }
+
+    // If no menu is set, show informational message
+    if (!isset($menu_locations['primary']) || empty($menu_locations['primary'])) {
+        $wp_customize->add_setting('menu_icons_info', array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+
+        $wp_customize->add_control('menu_icons_info', array(
+            'label'       => __('Menu Icons Information', 'theme1'),
+            'section'     => 'menu_icons_section',
+            'type'        => 'text',
+            'description' => __('Please create and assign a menu to the Primary Menu location in Appearance > Menus first. Then return here to add icons to your menu items.', 'theme1'),
+            'input_attrs' => array(
+                'readonly' => 'readonly',
+                'style' => 'display: none;',
+            ),
+        ));
     }
 }
 add_action('customize_register', 'theme1_customize_register');
@@ -569,14 +590,14 @@ class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
         $menu_icon = get_theme_mod('menu_icon_' . $item->ID, '');
         $icon_html = '';
         
-        if (!empty($menu_icon)) {
-            $icon_html = '<img src="' . esc_url($menu_icon) . '" alt="" class="menu-icon" />';
+        if (!empty($menu_icon) && filter_var($menu_icon, FILTER_VALIDATE_URL)) {
+            $icon_html = '<img src="' . esc_url($menu_icon) . '" alt="" class="menu-icon" loading="lazy" />';
         }
 
         $item_output = isset($args->before) ? $args->before : '';
         $item_output .= '<a' . $attributes . '>';
         $item_output .= $icon_html;
-        $item_output .= (isset($args->link_before) ? $args->link_before : '') . apply_filters('the_title', $item->title, $item->ID) . (isset($args->link_after) ? $args->link_after : '');
+        $item_output .= '<span class="menu-text">' . (isset($args->link_before) ? $args->link_before : '') . apply_filters('the_title', $item->title, $item->ID) . (isset($args->link_after) ? $args->link_after : '') . '</span>';
         $item_output .= '</a>';
         $item_output .= isset($args->after) ? $args->after : '';
 
