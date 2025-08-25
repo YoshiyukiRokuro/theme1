@@ -11,7 +11,14 @@ $hero_data = theme1_get_hero_data();
 ?>
 
 <!-- Hero Section -->
-<section class="hero-section full-width" style="<?php echo $hero_data['background_image'] ? 'background-image: url(' . esc_url($hero_data['background_image']) . ');' : ''; ?>">
+<section class="hero-section full-width" 
+    <?php if ($hero_data['slideshow_enable'] && count($hero_data['background_images']) > 1) : ?>
+        data-slideshow="true" 
+        data-speed="<?php echo esc_attr($hero_data['slideshow_speed']); ?>"
+        data-images="<?php echo esc_attr(json_encode($hero_data['background_images'])); ?>"
+    <?php else : ?>
+        style="<?php echo $hero_data['background_image'] ? 'background-image: url(' . esc_url($hero_data['background_image']) . ');' : ''; ?>"
+    <?php endif; ?>>
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title"><?php echo esc_html($hero_data['title']); ?></h1>
@@ -19,6 +26,14 @@ $hero_data = theme1_get_hero_data();
             <a href="<?php echo esc_url($hero_data['cta_url']); ?>" class="hero-cta"><?php echo esc_html($hero_data['cta_text']); ?></a>
         </div>
     </div>
+    
+    <?php if ($hero_data['slideshow_enable'] && count($hero_data['background_images']) > 1) : ?>
+        <div class="slideshow-indicators">
+            <?php foreach ($hero_data['background_images'] as $index => $image) : ?>
+                <button class="indicator <?php echo $index === 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>"></button>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </section>
 
 <!-- News Section -->

@@ -34,6 +34,63 @@
             $('.hero-section').css('background-position', 'center ' + rate + 'px');
         });
         
+        // Hero Section Slideshow
+        function initHeroSlideshow() {
+            var $heroSection = $('.hero-section[data-slideshow="true"]');
+            
+            if ($heroSection.length && $heroSection.data('images')) {
+                var images = $heroSection.data('images');
+                var speed = $heroSection.data('speed') || 5000;
+                var currentSlide = 0;
+                var slideshowInterval;
+                
+                // Set initial background
+                if (images.length > 0) {
+                    $heroSection.css('background-image', 'url(' + images[0] + ')');
+                }
+                
+                // Auto-advance slideshow
+                function nextSlide() {
+                    currentSlide = (currentSlide + 1) % images.length;
+                    $heroSection.css('background-image', 'url(' + images[currentSlide] + ')');
+                    
+                    // Update indicators
+                    $('.slideshow-indicators .indicator').removeClass('active');
+                    $('.slideshow-indicators .indicator').eq(currentSlide).addClass('active');
+                }
+                
+                // Start slideshow if multiple images
+                if (images.length > 1) {
+                    slideshowInterval = setInterval(nextSlide, speed);
+                    
+                    // Manual control via indicators
+                    $('.slideshow-indicators .indicator').on('click', function() {
+                        var slideIndex = $(this).data('slide');
+                        currentSlide = slideIndex;
+                        $heroSection.css('background-image', 'url(' + images[currentSlide] + ')');
+                        
+                        // Update indicators
+                        $('.slideshow-indicators .indicator').removeClass('active');
+                        $(this).addClass('active');
+                        
+                        // Restart interval
+                        clearInterval(slideshowInterval);
+                        slideshowInterval = setInterval(nextSlide, speed);
+                    });
+                    
+                    // Pause on hover
+                    $heroSection.on('mouseenter', function() {
+                        clearInterval(slideshowInterval);
+                    }).on('mouseleave', function() {
+                        slideshowInterval = setInterval(nextSlide, speed);
+                    });
+                }
+            }
+        }
+        
+        // Initialize slideshow
+        initHeroSlideshow();
+        
         // Fade in animation for sections on scroll
         function checkForAnimation() {
             var triggerBottom = $(window).scrollTop() + $(window).height() / 5 * 4;

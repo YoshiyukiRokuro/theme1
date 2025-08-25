@@ -59,6 +59,19 @@ body {
     letter-spacing: 0.05em;
 }
 
+.site-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-description {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 300;
+    margin-top: 0.25rem;
+    letter-spacing: 0.02em;
+}
+
 /* Navigation */
 .main-navigation ul {
     list-style: none;
@@ -139,6 +152,33 @@ body {
 
 .hero-cta:hover {
     background: rgba(139, 69, 19, 1);
+}
+
+/* Slideshow Indicators */
+.slideshow-indicators {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 3;
+}
+
+.slideshow-indicators .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slideshow-indicators .indicator.active,
+.slideshow-indicators .indicator:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 1);
 }
 
 /* Section Styles */
@@ -396,4 +436,196 @@ textarea:focus {
 
 .widget ul li a:hover {
     color: #8b4513;
+}
+
+/* Page and Post Layout */
+.content-area {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.content-area .entry-header {
+    margin-bottom: 2rem;
+}
+
+.content-area .entry-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
+}
+
+.content-area .entry-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.content-area .entry-meta span {
+    display: flex;
+    align-items: center;
+}
+
+.content-area .entry-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.content-area .entry-content h2,
+.content-area .entry-content h3,
+.content-area .entry-content h4 {
+    margin: 2rem 0 1rem;
+    font-weight: 400;
+    color: #333;
+}
+
+.content-area .entry-content p {
+    margin-bottom: 1.5rem;
+}
+
+.content-area .entry-footer {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e6e6e6;
+}
+
+.content-area .tags-links {
+    margin-bottom: 1rem;
+}
+
+.content-area .tags-links a {
+    background: #f5f5f5;
+    padding: 0.3rem 0.6rem;
+    margin: 0 0.3rem 0.3rem 0;
+    text-decoration: none;
+    color: #666;
+    font-size: 0.85rem;
+    border-radius: 3px;
+    display: inline-block;
+    transition: background 0.3s ease;
+}
+
+.content-area .tags-links a:hover {
+    background: #8b4513;
+    color: #fff;
+}
+
+.post-thumbnail {
+    margin-bottom: 2rem;
+}
+
+.post-thumbnail img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Page and Post Sidebars */
+.page-sidebar,
+.post-sidebar {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid #e6e6e6;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+/* Single column layout when no sidebar */
+.no-sidebar .content-area {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+/* Post Navigation */
+.post-navigation {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e6e6e6;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.post-navigation .nav-links {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.post-navigation .nav-previous,
+.post-navigation .nav-next {
+    flex: 1;
+}
+
+.post-navigation .nav-subtitle {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.post-navigation .nav-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.post-navigation a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-navigation a:hover .nav-title {
+    color: #8b4513;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .content-area {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .page-sidebar,
+    .post-sidebar {
+        position: static;
+    }
+    
+    .content-area .entry-title {
+        font-size: 2rem;
+    }
+    
+    .content-area .entry-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .post-navigation .nav-links {
+        flex-direction: column;
+    }
+}
+
+/* Footer Widgets */
+.footer-widgets {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid #e6e6e6;
+    margin-bottom: 2rem;
+}
+
+.footer-widgets .widget {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.footer-widgets .widget-title {
+    color: #333;
+    border-bottom-color: #8b4513;
 }
