@@ -74,13 +74,20 @@ $hero_data = theme1_get_hero_data();
 <!-- News Section -->
 <section id="news" class="news-section section">
     <div class="container">
-        <h2 class="section-title"><?php _e('Latest News', 'theme1'); ?></h2>
-        <p class="section-subtitle"><?php _e('Stay updated with our latest announcements and stories', 'theme1'); ?></p>
+        <h2 class="section-title"><?php echo esc_html(get_theme_mod('news_title', __('Latest News', 'theme1'))); ?></h2>
+        <p class="section-subtitle"><?php echo esc_html(get_theme_mod('news_subtitle', __('Stay updated with our latest announcements and stories', 'theme1'))); ?></p>
         
-        <div class="news-grid">
+        <?php
+        // Get customizer settings
+        $news_columns = get_theme_mod('news_columns', 'auto');
+        $news_posts_count = get_theme_mod('news_posts_count', 3);
+        $column_class = ($news_columns !== 'auto') ? ' columns-' . $news_columns : '';
+        ?>
+        
+        <div class="news-grid<?php echo esc_attr($column_class); ?>">
             <?php
             $news_query = new WP_Query(array(
-                'posts_per_page' => 3,
+                'posts_per_page' => $news_posts_count,
                 'post_status' => 'publish'
             ));
             

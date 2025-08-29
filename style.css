@@ -397,6 +397,23 @@ body {
     line-height: 1.6;
 }
 
+/* News Grid Column Overrides */
+.news-grid.columns-1 {
+    grid-template-columns: 1fr;
+}
+
+.news-grid.columns-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.news-grid.columns-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.news-grid.columns-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 /* About Section */
 .about-section {
     background: #f8f8f8;
@@ -592,6 +609,13 @@ body {
     }
     
     .news-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Override column classes on mobile for better readability */
+    .news-grid.columns-2,
+    .news-grid.columns-3,
+    .news-grid.columns-4 {
         grid-template-columns: 1fr;
     }
     
