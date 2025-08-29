@@ -115,6 +115,21 @@ function theme1_sanitize_news_posts_count($input) {
 }
 
 /**
+ * Sanitize category columns setting
+ */
+function theme1_sanitize_category_columns($input) {
+    $valid = array('auto', '1', '2', '3', '4');
+    return (in_array($input, $valid)) ? $input : 'auto';
+}
+
+/**
+ * Sanitize checkbox setting
+ */
+function theme1_sanitize_checkbox($input) {
+    return (isset($input) && true == $input) ? true : false;
+}
+
+/**
  * Customizer additions
  */
 function theme1_customize_register($wp_customize) {
@@ -456,6 +471,101 @@ function theme1_customize_register($wp_customize) {
             'step' => 1,
         ),
     ));
+    
+    // Category Menu Panel
+    $wp_customize->add_panel('category_menu_panel', array(
+        'title'       => __('Category Menu Section', 'theme1'),
+        'description' => __('Customize the category horizontal menu section', 'theme1'),
+        'priority'    => 45,
+    ));
+    
+    // Category Menu Settings Section
+    $wp_customize->add_section('category_menu_settings', array(
+        'title'       => __('Category Menu Settings', 'theme1'),
+        'panel'       => 'category_menu_panel',
+        'priority'    => 10,
+    ));
+    
+    // Enable Category Menu
+    $wp_customize->add_setting('category_menu_enable', array(
+        'default'           => false,
+        'sanitize_callback' => 'theme1_sanitize_checkbox',
+    ));
+    
+    $wp_customize->add_control('category_menu_enable', array(
+        'label'    => __('Enable Category Menu', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'checkbox',
+    ));
+    
+    // Category Menu Title
+    $wp_customize->add_setting('category_menu_title', array(
+        'default'           => __('Browse Categories', 'theme1'),
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    
+    $wp_customize->add_control('category_menu_title', array(
+        'label'    => __('Section Title', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'text',
+    ));
+    
+    // Category Menu Subtitle
+    $wp_customize->add_setting('category_menu_subtitle', array(
+        'default'           => __('Explore our content by category', 'theme1'),
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    
+    $wp_customize->add_control('category_menu_subtitle', array(
+        'label'    => __('Section Subtitle', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'text',
+    ));
+    
+    // Number of Columns
+    $wp_customize->add_setting('category_menu_columns', array(
+        'default'           => 'auto',
+        'sanitize_callback' => 'theme1_sanitize_category_columns',
+    ));
+    
+    $wp_customize->add_control('category_menu_columns', array(
+        'label'    => __('Number of Columns', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'select',
+        'choices'  => array(
+            'auto' => __('Auto (responsive)', 'theme1'),
+            '1'    => __('1 Column', 'theme1'),
+            '2'    => __('2 Columns', 'theme1'),
+            '3'    => __('3 Columns', 'theme1'),
+            '4'    => __('4 Columns', 'theme1'),
+        ),
+    ));
+    
+    // Category Icons Section
+    $wp_customize->add_section('category_icons_section', array(
+        'title'       => __('Category Icons', 'theme1'),
+        'panel'       => 'category_menu_panel',
+        'priority'    => 20,
+    ));
+    
+    // Add category icon controls for each category
+    $categories = get_categories(array('hide_empty' => false));
+    if (!empty($categories)) {
+        foreach ($categories as $category) {
+            // Category icon setting
+            $wp_customize->add_setting('category_icon_' . $category->term_id, array(
+                'default'           => '',
+                'sanitize_callback' => 'esc_url_raw',
+            ));
+
+            // Category icon control
+            $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'category_icon_' . $category->term_id, array(
+                'label'    => sprintf(__('Icon for "%s"', 'theme1'), $category->name),
+                'section'  => 'category_icons_section',
+                'settings' => 'category_icon_' . $category->term_id,
+            )));
+        }
+    }
     
     // Contact Section Panel
     $wp_customize->add_panel('contact_panel', array(
