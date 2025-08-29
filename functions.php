@@ -951,6 +951,8 @@ add_filter('body_class', 'theme1_body_classes');
  */
 class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
     
+    public $has_children;
+    
     function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
         $indent = ($depth) ? str_repeat("\t", $depth) : '';
 
