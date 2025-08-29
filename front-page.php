@@ -71,6 +71,9 @@ $hero_data = theme1_get_hero_data();
     <?php endif; ?>
 </section>
 
+<!-- Category Menu Section -->
+<?php get_template_part('template-parts/category-menu'); ?>
+
 <!-- News Section -->
 <section id="news" class="news-section section">
     <div class="container">

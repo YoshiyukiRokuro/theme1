@@ -95,6 +95,9 @@ add_action('widgets_init', 'theme1_widgets_init');
 function theme1_scripts() {
     wp_enqueue_style('theme1-style', get_stylesheet_uri(), array(), '1.0.0');
     wp_enqueue_script('theme1-script', get_template_directory_uri() . '/assets/js/theme.js', array('jquery'), '1.0.0', true);
+    
+    // Enqueue FontAwesome for icons
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0');
 }
 add_action('wp_enqueue_scripts', 'theme1_scripts');
 
@@ -112,6 +115,37 @@ function theme1_sanitize_news_columns($input) {
 function theme1_sanitize_news_posts_count($input) {
     $input = intval($input);
     return ($input >= 1 && $input <= 10) ? $input : 3;
+}
+
+/**
+ * Sanitize category columns setting
+ */
+function theme1_sanitize_category_columns($input) {
+    $valid = array('auto', '2', '3', '4', '5');
+    return (in_array($input, $valid)) ? $input : 'auto';
+}
+
+/**
+ * Sanitize checkbox setting
+ */
+function theme1_sanitize_checkbox($input) {
+    return (isset($input) && true == $input) ? true : false;
+}
+
+/**
+ * Sanitize icon type setting
+ */
+function theme1_sanitize_icon_type($input) {
+    $valid = array('image', 'fontawesome');
+    return (in_array($input, $valid)) ? $input : 'image';
+}
+
+/**
+ * Sanitize FontAwesome class
+ */
+function theme1_sanitize_fontawesome($input) {
+    // Basic sanitization for FontAwesome classes
+    return sanitize_text_field($input);
 }
 
 /**
@@ -555,10 +589,135 @@ function theme1_customize_register($wp_customize) {
         'type'     => 'textarea',
     ));
 
+    // Category Menu Panel
+    $wp_customize->add_panel('category_menu_panel', array(
+        'title'       => __('Category Menu Section', 'theme1'),
+        'description' => __('Customize the category horizontal menu section', 'theme1'),
+        'priority'    => 55,
+    ));
+    
+    // Category Menu Settings Section
+    $wp_customize->add_section('category_menu_settings', array(
+        'title'       => __('Category Menu Settings', 'theme1'),
+        'panel'       => 'category_menu_panel',
+        'priority'    => 10,
+    ));
+    
+    // Enable Category Menu
+    $wp_customize->add_setting('category_menu_enable', array(
+        'default'           => false,
+        'sanitize_callback' => 'theme1_sanitize_checkbox',
+    ));
+    
+    $wp_customize->add_control('category_menu_enable', array(
+        'label'    => __('Enable Category Menu', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'checkbox',
+    ));
+    
+    // Category Menu Title
+    $wp_customize->add_setting('category_menu_title', array(
+        'default'           => __('Browse Categories', 'theme1'),
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    
+    $wp_customize->add_control('category_menu_title', array(
+        'label'    => __('Section Title', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'text',
+    ));
+    
+    // Category Menu Subtitle
+    $wp_customize->add_setting('category_menu_subtitle', array(
+        'default'           => __('Explore our content by category', 'theme1'),
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    
+    $wp_customize->add_control('category_menu_subtitle', array(
+        'label'    => __('Section Subtitle', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'text',
+    ));
+    
+    // Number of Columns (2-5 as requested)
+    $wp_customize->add_setting('category_menu_columns', array(
+        'default'           => 'auto',
+        'sanitize_callback' => 'theme1_sanitize_category_columns',
+    ));
+    
+    $wp_customize->add_control('category_menu_columns', array(
+        'label'    => __('Number of Columns', 'theme1'),
+        'section'  => 'category_menu_settings',
+        'type'     => 'select',
+        'choices'  => array(
+            'auto' => __('Auto (responsive)', 'theme1'),
+            '2'    => __('2 Columns', 'theme1'),
+            '3'    => __('3 Columns', 'theme1'),
+            '4'    => __('4 Columns', 'theme1'),
+            '5'    => __('5 Columns', 'theme1'),
+        ),
+    ));
+    
+    // Category Icons Section
+    $wp_customize->add_section('category_icons_section', array(
+        'title'       => __('Category Icons', 'theme1'),
+        'panel'       => 'category_menu_panel',
+        'priority'    => 20,
+    ));
+    
+    // Add category icon controls for each category
+    $categories = get_categories(array('hide_empty' => false));
+    if (!empty($categories)) {
+        foreach ($categories as $category) {
+            // Icon type selection
+            $wp_customize->add_setting('category_icon_type_' . $category->term_id, array(
+                'default'           => 'image',
+                'sanitize_callback' => 'theme1_sanitize_icon_type',
+            ));
+
+            $wp_customize->add_control('category_icon_type_' . $category->term_id, array(
+                'label'    => sprintf(__('Icon Type for "%s"', 'theme1'), $category->name),
+                'section'  => 'category_icons_section',
+                'type'     => 'select',
+                'choices'  => array(
+                    'image'      => __('Upload Image', 'theme1'),
+                    'fontawesome' => __('FontAwesome Icon', 'theme1'),
+                ),
+            ));
+            
+            // Category image icon setting
+            $wp_customize->add_setting('category_icon_' . $category->term_id, array(
+                'default'           => '',
+                'sanitize_callback' => 'esc_url_raw',
+            ));
+
+            // Category image icon control
+            $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'category_icon_' . $category->term_id, array(
+                'label'    => sprintf(__('Image Icon for "%s"', 'theme1'), $category->name),
+                'section'  => 'category_icons_section',
+                'settings' => 'category_icon_' . $category->term_id,
+                'description' => __('Upload an image to use as the category icon. Recommended size: 300x120px', 'theme1'),
+            )));
+            
+            // FontAwesome icon setting
+            $wp_customize->add_setting('category_fontawesome_' . $category->term_id, array(
+                'default'           => '',
+                'sanitize_callback' => 'theme1_sanitize_fontawesome',
+            ));
+
+            $wp_customize->add_control('category_fontawesome_' . $category->term_id, array(
+                'label'    => sprintf(__('FontAwesome Icon for "%s"', 'theme1'), $category->name),
+                'section'  => 'category_icons_section',
+                'type'     => 'text',
+                'description' => __('Enter FontAwesome class (e.g., "fas fa-home", "fab fa-wordpress"). Browse icons at fontawesome.com', 'theme1'),
+            ));
+        }
+    }
+
     // Menu Icons Section
     $wp_customize->add_section('menu_icons_section', array(
         'title'       => __('Menu Icons', 'theme1'),
-        'description' => __('Upload icons for your menu items. Icons will appear next to menu text.', 'theme1'),
+        'description' => __('Add icons to your menu items. Choose between image upload or FontAwesome icons.', 'theme1'),
         'priority'    => 60,
     ));
 
@@ -571,18 +730,47 @@ function theme1_customize_register($wp_customize) {
             if ($menu_items && !is_wp_error($menu_items)) {
                 foreach ($menu_items as $menu_item) {
                     if ($menu_item->menu_item_parent == 0) { // Only top-level items for simplicity
-                        // Menu icon setting
+                        // Menu icon type selection
+                        $wp_customize->add_setting('menu_icon_type_' . $menu_item->ID, array(
+                            'default'           => 'image',
+                            'sanitize_callback' => 'theme1_sanitize_icon_type',
+                        ));
+
+                        $wp_customize->add_control('menu_icon_type_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('Icon Type for "%s"', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'type'     => 'select',
+                            'choices'  => array(
+                                'image'      => __('Upload Image', 'theme1'),
+                                'fontawesome' => __('FontAwesome Icon', 'theme1'),
+                            ),
+                        ));
+                        
+                        // Menu image icon setting
                         $wp_customize->add_setting('menu_icon_' . $menu_item->ID, array(
                             'default'           => '',
                             'sanitize_callback' => 'esc_url_raw',
                         ));
 
-                        // Menu icon control
+                        // Menu image icon control
                         $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'menu_icon_' . $menu_item->ID, array(
-                            'label'    => sprintf(__('Icon for "%s"', 'theme1'), $menu_item->title),
+                            'label'    => sprintf(__('Image Icon for "%s"', 'theme1'), $menu_item->title),
                             'section'  => 'menu_icons_section',
                             'settings' => 'menu_icon_' . $menu_item->ID,
                         )));
+                        
+                        // Menu FontAwesome icon setting
+                        $wp_customize->add_setting('menu_fontawesome_' . $menu_item->ID, array(
+                            'default'           => '',
+                            'sanitize_callback' => 'theme1_sanitize_fontawesome',
+                        ));
+
+                        $wp_customize->add_control('menu_fontawesome_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('FontAwesome Icon for "%s"', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'type'     => 'text',
+                            'description' => __('Enter FontAwesome class (e.g., "fas fa-home", "fab fa-wordpress")', 'theme1'),
+                        ));
                     }
                 }
             }
@@ -781,10 +969,14 @@ class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
         $attributes .= ! empty($item->url)        ? ' href="'   . esc_attr($item->url        ) .'"' : '';
 
         // Get menu icon from theme mod
+        $menu_icon_type = get_theme_mod('menu_icon_type_' . $item->ID, 'image');
         $menu_icon = get_theme_mod('menu_icon_' . $item->ID, '');
+        $menu_fontawesome = get_theme_mod('menu_fontawesome_' . $item->ID, '');
         $icon_html = '';
         
-        if (!empty($menu_icon) && filter_var($menu_icon, FILTER_VALIDATE_URL)) {
+        if ($menu_icon_type === 'fontawesome' && !empty($menu_fontawesome)) {
+            $icon_html = '<i class="' . esc_attr($menu_fontawesome) . ' menu-icon menu-icon-fa"></i>';
+        } elseif ($menu_icon_type === 'image' && !empty($menu_icon) && filter_var($menu_icon, FILTER_VALIDATE_URL)) {
             $icon_html = '<img src="' . esc_url($menu_icon) . '" alt="" class="menu-icon" loading="lazy" />';
         }
 
