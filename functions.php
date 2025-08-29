@@ -110,7 +110,7 @@ function theme1_sanitize_news_columns($input) {
  * Sanitize news posts count setting
  */
 function theme1_sanitize_news_posts_count($input) {
-    $input = absint($input);
+    $input = intval($input);
     return ($input >= 1 && $input <= 10) ? $input : 3;
 }
 
