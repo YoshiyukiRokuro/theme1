@@ -99,6 +99,22 @@ function theme1_scripts() {
 add_action('wp_enqueue_scripts', 'theme1_scripts');
 
 /**
+ * Sanitize news columns setting
+ */
+function theme1_sanitize_news_columns($input) {
+    $valid = array('auto', '1', '2', '3', '4');
+    return (in_array($input, $valid)) ? $input : 'auto';
+}
+
+/**
+ * Sanitize news posts count setting
+ */
+function theme1_sanitize_news_posts_count($input) {
+    $input = intval($input);
+    return ($input >= 1 && $input <= 10) ? $input : 3;
+}
+
+/**
  * Customizer additions
  */
 function theme1_customize_register($wp_customize) {
@@ -358,6 +374,87 @@ function theme1_customize_register($wp_customize) {
         'label'    => __('About Image Alt Text', 'theme1'),
         'section'  => 'about_content_section',
         'type'     => 'text',
+    ));
+    
+    // Latest News Section Panel
+    $wp_customize->add_panel('news_panel', array(
+        'title'       => __('Latest News Section', 'theme1'),
+        'description' => __('Customize the Latest News section of your homepage', 'theme1'),
+        'priority'    => 45,
+    ));
+    
+    // News Content Section
+    $wp_customize->add_section('news_content_section', array(
+        'title'       => __('News Content', 'theme1'),
+        'panel'       => 'news_panel',
+        'priority'    => 10,
+    ));
+    
+    // News Title
+    $wp_customize->add_setting('news_title', array(
+        'default'           => __('Latest News', 'theme1'),
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    
+    $wp_customize->add_control('news_title', array(
+        'label'    => __('News Section Title', 'theme1'),
+        'section'  => 'news_content_section',
+        'type'     => 'text',
+    ));
+    
+    // News Subtitle
+    $wp_customize->add_setting('news_subtitle', array(
+        'default'           => __('Stay updated with our latest announcements and stories', 'theme1'),
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ));
+    
+    $wp_customize->add_control('news_subtitle', array(
+        'label'    => __('News Section Subtitle', 'theme1'),
+        'section'  => 'news_content_section',
+        'type'     => 'textarea',
+    ));
+    
+    // News Layout Section
+    $wp_customize->add_section('news_layout_section', array(
+        'title'       => __('News Layout', 'theme1'),
+        'panel'       => 'news_panel',
+        'priority'    => 20,
+    ));
+    
+    // Number of Columns
+    $wp_customize->add_setting('news_columns', array(
+        'default'           => 'auto',
+        'sanitize_callback' => 'theme1_sanitize_news_columns',
+    ));
+    
+    $wp_customize->add_control('news_columns', array(
+        'label'    => __('Number of Columns', 'theme1'),
+        'section'  => 'news_layout_section',
+        'type'     => 'select',
+        'choices'  => array(
+            'auto' => __('Auto (responsive)', 'theme1'),
+            '1'    => __('1 Column', 'theme1'),
+            '2'    => __('2 Columns', 'theme1'),
+            '3'    => __('3 Columns', 'theme1'),
+            '4'    => __('4 Columns', 'theme1'),
+        ),
+    ));
+    
+    // Number of Posts
+    $wp_customize->add_setting('news_posts_count', array(
+        'default'           => 3,
+        'sanitize_callback' => 'theme1_sanitize_news_posts_count',
+    ));
+    
+    $wp_customize->add_control('news_posts_count', array(
+        'label'    => __('Number of Posts to Display', 'theme1'),
+        'section'  => 'news_layout_section',
+        'type'     => 'number',
+        'input_attrs' => array(
+            'min' => 1,
+            'max' => 10,
+            'step' => 1,
+        ),
     ));
     
     // Contact Section Panel
