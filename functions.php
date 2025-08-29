@@ -799,3 +799,104 @@ class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
         $output .= $indent . "\t" . $item_output . "\n";
     }
 }
+
+/**
+ * Generate breadcrumb navigation
+ */
+function theme1_breadcrumb() {
+    // Don't show breadcrumbs on the front page
+    if (is_front_page()) {
+        return;
+    }
+    
+    $home_text = __('Home', 'theme1');
+    $separator = '<span class="breadcrumb-separator"> > </span>';
+    
+    echo '<nav class="breadcrumb-navigation" aria-label="' . esc_attr__('Breadcrumb', 'theme1') . '">';
+    echo '<ol class="breadcrumb">';
+    
+    // Home link
+    echo '<li class="breadcrumb-item">';
+    echo '<a href="' . esc_url(home_url('/')) . '">' . esc_html($home_text) . '</a>';
+    echo '</li>';
+    
+    if (is_category() || is_single()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        
+        if (is_single()) {
+            $category = get_the_category();
+            if (!empty($category)) {
+                $cat = $category[0];
+                echo '<a href="' . esc_url(get_category_link($cat->term_id)) . '">' . esc_html($cat->name) . '</a>';
+                echo '</li>';
+                echo '<li class="breadcrumb-item">';
+                echo $separator;
+                echo '<span class="breadcrumb-current">' . esc_html(get_the_title()) . '</span>';
+            } else {
+                echo '<span class="breadcrumb-current">' . esc_html(get_the_title()) . '</span>';
+            }
+        } else {
+            echo '<span class="breadcrumb-current">' . esc_html(single_cat_title('', false)) . '</span>';
+        }
+        echo '</li>';
+        
+    } elseif (is_page()) {
+        $page_id = get_the_ID();
+        $ancestors = get_post_ancestors($page_id);
+        
+        if ($ancestors) {
+            $ancestors = array_reverse($ancestors);
+            foreach ($ancestors as $ancestor) {
+                echo '<li class="breadcrumb-item">';
+                echo $separator;
+                echo '<a href="' . esc_url(get_permalink($ancestor)) . '">' . esc_html(get_the_title($ancestor)) . '</a>';
+                echo '</li>';
+            }
+        }
+        
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        echo '<span class="breadcrumb-current">' . esc_html(get_the_title()) . '</span>';
+        echo '</li>';
+        
+    } elseif (is_tag()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        echo '<span class="breadcrumb-current">' . __('Tag: ', 'theme1') . esc_html(single_tag_title('', false)) . '</span>';
+        echo '</li>';
+        
+    } elseif (is_author()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        echo '<span class="breadcrumb-current">' . __('Author: ', 'theme1') . esc_html(get_the_author()) . '</span>';
+        echo '</li>';
+        
+    } elseif (is_date()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        if (is_year()) {
+            echo '<span class="breadcrumb-current">' . esc_html(get_the_date('Y')) . '</span>';
+        } elseif (is_month()) {
+            echo '<span class="breadcrumb-current">' . esc_html(get_the_date('F Y')) . '</span>';
+        } elseif (is_day()) {
+            echo '<span class="breadcrumb-current">' . esc_html(get_the_date('F j, Y')) . '</span>';
+        }
+        echo '</li>';
+        
+    } elseif (is_search()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        echo '<span class="breadcrumb-current">' . __('Search Results for: ', 'theme1') . esc_html(get_search_query()) . '</span>';
+        echo '</li>';
+        
+    } elseif (is_404()) {
+        echo '<li class="breadcrumb-item">';
+        echo $separator;
+        echo '<span class="breadcrumb-current">' . __('404 Not Found', 'theme1') . '</span>';
+        echo '</li>';
+    }
+    
+    echo '</ol>';
+    echo '</nav>';
+}

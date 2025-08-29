@@ -6,6 +6,7 @@ A calm, Japanese-inspired WordPress theme featuring full-width sections, customi
 
 - **Japanese-inspired Design**: Clean, minimalist aesthetic with thoughtful spacing and typography
 - **Customizable Hero Section**: Full-width hero with customizable image, title, subtitle, and CTA button via WordPress Customizer
+- **Breadcrumb Navigation**: Automatic breadcrumb navigation showing page hierarchy for improved user experience
 - **Responsive Layout**: Mobile-first design that works on all devices
 - **Theme Support**: Custom logos, navigation menus, and post thumbnails
 - **Structured Sections**: 
@@ -40,6 +41,17 @@ Go to **Appearance > Customize > Hero Section** to modify:
 1. Go to **Appearance > Customize > Site Identity**
 2. Upload your logo image
 3. The theme will automatically display it in the header
+
+### Breadcrumb Navigation
+The theme includes automatic breadcrumb navigation that appears on all pages except the homepage. The breadcrumbs show:
+- **Single Posts**: Home > Category > Post Title
+- **Pages**: Home > Parent Page(s) > Current Page
+- **Category Archives**: Home > Category Name
+- **Tag Archives**: Home > Tag: Tag Name
+- **Author Archives**: Home > Author: Author Name
+- **Search Results**: Home > Search Results for: Query
+
+The breadcrumbs are automatically styled to match the theme's Japanese-inspired design and include hover effects for better user interaction.
 
 ## File Structure
 

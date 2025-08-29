@@ -7,6 +7,7 @@ get_header(); ?>
 
 <main id="primary" class="site-main">
     <div class="container <?php echo !is_active_sidebar('page-sidebar') ? 'no-sidebar' : ''; ?>">
+        <?php get_template_part('template-parts/breadcrumb'); ?>
         <div class="content-area">
             <?php while (have_posts()) : the_post(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
