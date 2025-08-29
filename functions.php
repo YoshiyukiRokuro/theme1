@@ -98,6 +98,11 @@ function theme1_scripts() {
     
     // Enqueue FontAwesome for icons
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0');
+    
+    // Pass submenu settings to JavaScript
+    wp_localize_script('theme1-script', 'theme1_submenu', array(
+        'trigger' => get_theme_mod('submenu_trigger', 'hover')
+    ));
 }
 add_action('wp_enqueue_scripts', 'theme1_scripts');
 
@@ -146,6 +151,22 @@ function theme1_sanitize_icon_type($input) {
 function theme1_sanitize_fontawesome($input) {
     // Basic sanitization for FontAwesome classes
     return sanitize_text_field($input);
+}
+
+/**
+ * Sanitize submenu columns
+ */
+function theme1_sanitize_submenu_columns($input) {
+    $valid_columns = array('2', '3', '4', '5');
+    return in_array($input, $valid_columns) ? $input : '3';
+}
+
+/**
+ * Sanitize submenu trigger
+ */
+function theme1_sanitize_submenu_trigger($input) {
+    $valid_triggers = array('hover', 'click', 'both');
+    return in_array($input, $valid_triggers) ? $input : 'hover';
 }
 
 /**
@@ -795,6 +816,105 @@ function theme1_customize_register($wp_customize) {
             ),
         ));
     }
+
+    // Submenu Settings Section
+    $wp_customize->add_section('submenu_settings_section', array(
+        'title'       => __('Submenu Settings', 'theme1'),
+        'description' => __('Configure submenu layout and behavior', 'theme1'),
+        'priority'    => 61,
+    ));
+
+    // Submenu column count setting
+    $wp_customize->add_setting('submenu_columns', array(
+        'default'           => '3',
+        'sanitize_callback' => 'theme1_sanitize_submenu_columns',
+    ));
+
+    $wp_customize->add_control('submenu_columns', array(
+        'label'    => __('Submenu Columns', 'theme1'),
+        'section'  => 'submenu_settings_section',
+        'type'     => 'select',
+        'description' => __('Number of columns for horizontal submenu layout', 'theme1'),
+        'choices'  => array(
+            '2' => __('2 Columns', 'theme1'),
+            '3' => __('3 Columns', 'theme1'),
+            '4' => __('4 Columns', 'theme1'),
+            '5' => __('5 Columns', 'theme1'),
+        ),
+    ));
+
+    // Submenu trigger method
+    $wp_customize->add_setting('submenu_trigger', array(
+        'default'           => 'hover',
+        'sanitize_callback' => 'theme1_sanitize_submenu_trigger',
+    ));
+
+    $wp_customize->add_control('submenu_trigger', array(
+        'label'    => __('Submenu Trigger', 'theme1'),
+        'section'  => 'submenu_settings_section',
+        'type'     => 'select',
+        'description' => __('How submenus should be activated', 'theme1'),
+        'choices'  => array(
+            'hover' => __('On Hover', 'theme1'),
+            'click' => __('On Click', 'theme1'),
+            'both'  => __('Both Hover and Click', 'theme1'),
+        ),
+    ));
+
+    // Enable submenu icons for all menu items (including sub-items)
+    if (isset($menu_locations['primary']) && !empty($menu_locations['primary'])) {
+        $menu = wp_get_nav_menu_object($menu_locations['primary']);
+        if ($menu) {
+            $menu_items = wp_get_nav_menu_items($menu->term_id);
+            if ($menu_items && !is_wp_error($menu_items)) {
+                foreach ($menu_items as $menu_item) {
+                    // Extend icons to submenu items as well (not just top-level)
+                    if ($menu_item->menu_item_parent != 0) { // This is a submenu item
+                        // Menu icon type selection for submenu items
+                        $wp_customize->add_setting('menu_icon_type_' . $menu_item->ID, array(
+                            'default'           => 'image',
+                            'sanitize_callback' => 'theme1_sanitize_icon_type',
+                        ));
+
+                        $wp_customize->add_control('menu_icon_type_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('Icon Type for "%s" (Submenu)', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'type'     => 'select',
+                            'choices'  => array(
+                                'image'      => __('Upload Image', 'theme1'),
+                                'fontawesome' => __('FontAwesome Icon', 'theme1'),
+                            ),
+                        ));
+                        
+                        // Menu image icon setting for submenu items
+                        $wp_customize->add_setting('menu_icon_' . $menu_item->ID, array(
+                            'default'           => '',
+                            'sanitize_callback' => 'esc_url_raw',
+                        ));
+
+                        $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'menu_icon_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('Image Icon for "%s" (Submenu)', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'settings' => 'menu_icon_' . $menu_item->ID,
+                        )));
+                        
+                        // Menu FontAwesome icon setting for submenu items
+                        $wp_customize->add_setting('menu_fontawesome_' . $menu_item->ID, array(
+                            'default'           => '',
+                            'sanitize_callback' => 'theme1_sanitize_fontawesome',
+                        ));
+
+                        $wp_customize->add_control('menu_fontawesome_' . $menu_item->ID, array(
+                            'label'    => sprintf(__('FontAwesome Icon for "%s" (Submenu)', 'theme1'), $menu_item->title),
+                            'section'  => 'menu_icons_section',
+                            'type'     => 'text',
+                            'description' => __('Enter FontAwesome class (e.g., "fas fa-home", "fab fa-wordpress")', 'theme1'),
+                        ));
+                    }
+                }
+            }
+        }
+    }
 }
 add_action('customize_register', 'theme1_customize_register');
 
@@ -947,15 +1067,43 @@ function theme1_body_classes($classes) {
 add_filter('body_class', 'theme1_body_classes');
 
 /**
- * Custom Navigation Walker for Menu Icons
+ * Custom Navigation Walker for Menu Icons and Submenus
  */
 class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
+    
+    // Track if we have children for current item
+    private $has_children = false;
+    
+    function start_lvl(&$output, $depth = 0, $args = null) {
+        $indent = str_repeat("\t", $depth);
+        $submenu_columns = get_theme_mod('submenu_columns', '3');
+        $column_class = 'submenu-columns-' . $submenu_columns;
+        
+        if ($depth == 0) {
+            // First level submenu - use horizontal layout
+            $output .= "\n$indent<ul class=\"sub-menu submenu-horizontal $column_class\">\n";
+        } else {
+            // Deeper level submenus - standard vertical layout
+            $output .= "\n$indent<ul class=\"sub-menu\">\n";
+        }
+    }
+
+    function end_lvl(&$output, $depth = 0, $args = null) {
+        $indent = str_repeat("\t", $depth);
+        $output .= "$indent</ul>\n";
+    }
     
     function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
         $indent = ($depth) ? str_repeat("\t", $depth) : '';
 
         $classes = empty($item->classes) ? array() : (array) $item->classes;
         $classes[] = 'menu-item-' . $item->ID;
+        
+        // Check if this item has children
+        $has_children = in_array('menu-item-has-children', $classes);
+        if ($has_children) {
+            $classes[] = 'has-submenu';
+        }
 
         $class_names = join(' ', apply_filters('nav_menu_css_class', array_filter($classes), $item, $args));
         $class_names = $class_names ? ' class="' . esc_attr($class_names) . '"' : '';
@@ -984,11 +1132,21 @@ class Theme1_Walker_Nav_Menu extends Walker_Nav_Menu {
         $item_output .= '<a' . $attributes . '>';
         $item_output .= $icon_html;
         $item_output .= '<span class="menu-text">' . (isset($args->link_before) ? $args->link_before : '') . apply_filters('the_title', $item->title, $item->ID) . (isset($args->link_after) ? $args->link_after : '') . '</span>';
+        
+        // Add dropdown indicator for parent items
+        if ($has_children && $depth == 0) {
+            $item_output .= '<i class="submenu-toggle fas fa-chevron-down"></i>';
+        }
+        
         $item_output .= '</a>';
         $item_output .= isset($args->after) ? $args->after : '';
 
         $output .= $indent . '<li' . $id . $class_names .'>' . "\n";
         $output .= $indent . "\t" . $item_output . "\n";
+    }
+
+    function end_el(&$output, $item, $depth = 0, $args = null) {
+        $output .= "\t</li>\n";
     }
 }
 

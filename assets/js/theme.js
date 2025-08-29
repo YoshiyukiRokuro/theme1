@@ -52,7 +52,84 @@
                 $('.main-navigation').removeClass('active');
                 $('.mobile-menu-toggle').removeClass('active').attr('aria-expanded', 'false');
                 $(document).off('click.mobile-menu');
+                // Also close any open submenus
+                $('.has-submenu').removeClass('mobile-submenu-open');
             }
+        });
+        
+        // Submenu functionality
+        function initSubmenuInteractions() {
+            var isMobile = $(window).width() <= 768;
+            var submenuTrigger = (typeof theme1_submenu !== 'undefined') ? theme1_submenu.trigger : 'hover';
+            
+            if (isMobile) {
+                // Mobile submenu behavior - click to toggle
+                $('.has-submenu > a').click(function(e) {
+                    e.preventDefault();
+                    var $parent = $(this).parent();
+                    var $submenu = $parent.find('.sub-menu').first();
+                    
+                    if ($submenu.length) {
+                        $parent.toggleClass('mobile-submenu-open');
+                        
+                        // Close other open submenus
+                        $('.has-submenu').not($parent).removeClass('mobile-submenu-open');
+                    } else {
+                        // No submenu, follow the link
+                        window.location.href = $(this).attr('href');
+                    }
+                });
+            } else {
+                // Desktop submenu behavior
+                if (submenuTrigger === 'hover' || submenuTrigger === 'both') {
+                    $('.has-submenu').hover(
+                        function() {
+                            $(this).addClass('active');
+                        },
+                        function() {
+                            $(this).removeClass('active');
+                        }
+                    );
+                }
+                
+                if (submenuTrigger === 'click' || submenuTrigger === 'both') {
+                    $('.has-submenu > a').click(function(e) {
+                        var $parent = $(this).parent();
+                        var $submenu = $parent.find('.sub-menu').first();
+                        
+                        if ($submenu.length) {
+                            e.preventDefault();
+                            $parent.toggleClass('active');
+                            
+                            // Close other open submenus
+                            $('.has-submenu').not($parent).removeClass('active');
+                        }
+                    });
+                }
+                
+                // Close submenus when clicking outside
+                $(document).click(function(e) {
+                    if (!$(e.target).closest('.has-submenu').length) {
+                        $('.has-submenu').removeClass('active');
+                    }
+                });
+            }
+        }
+        
+        // Initialize submenu interactions
+        initSubmenuInteractions();
+        
+        // Reinitialize on window resize
+        $(window).resize(function() {
+            setTimeout(function() {
+                // Remove existing event handlers
+                $('.has-submenu').off('mouseenter mouseleave click');
+                $('.has-submenu > a').off('click');
+                $(document).off('click.submenu');
+                
+                // Reinitialize
+                initSubmenuInteractions();
+            }, 100);
         });
         
         // Parallax effect for hero section (optional)

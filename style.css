@@ -118,6 +118,109 @@ body {
     white-space: nowrap;
 }
 
+/* Submenu Dropdown Arrow */
+.submenu-toggle {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.has-submenu:hover .submenu-toggle {
+    transform: rotate(180deg);
+}
+
+/* Submenu Styles */
+.main-navigation .sub-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    padding: 1.5rem;
+    min-width: 600px;
+}
+
+.main-navigation .has-submenu:hover .sub-menu,
+.main-navigation .has-submenu.active .sub-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Horizontal Submenu Layout */
+.main-navigation .submenu-horizontal {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr); /* default 3 columns */
+}
+
+/* Column variants */
+.main-navigation .submenu-columns-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.main-navigation .submenu-columns-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.main-navigation .submenu-columns-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.main-navigation .submenu-columns-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* Submenu Items */
+.main-navigation .sub-menu li {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.main-navigation .sub-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.main-navigation .sub-menu a:hover {
+    background: #f8f8f8;
+    border-color: #e8e8e8;
+    transform: translateY(-2px);
+}
+
+/* Submenu Icons */
+.main-navigation .sub-menu .menu-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.main-navigation .sub-menu .menu-icon-fa {
+    width: 24px;
+    height: 24px;
+    font-size: 1.2rem;
+}
+
+/* Submenu Text */
+.main-navigation .sub-menu .menu-text {
+    flex: 1;
+    white-space: normal;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
@@ -711,6 +814,52 @@ body {
         gap: 0.5rem;
         padding: 1rem;
         font-size: 1rem;
+    }
+    
+    /* Mobile Submenu Styles */
+    .main-navigation .sub-menu {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        background: #f8f8f8;
+        border-radius: 0;
+        margin: 0;
+        padding: 0;
+        min-width: auto;
+        display: none;
+    }
+    
+    .main-navigation .submenu-horizontal {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .main-navigation .has-submenu.mobile-submenu-open .sub-menu {
+        display: flex;
+    }
+    
+    .main-navigation .sub-menu a {
+        padding: 0.8rem 2rem;
+        background: #f8f8f8;
+        border-radius: 0;
+        font-size: 0.9rem;
+    }
+    
+    .main-navigation .sub-menu a:hover {
+        background: #eee;
+        transform: none;
+        border-color: transparent;
+    }
+    
+    .main-navigation .submenu-toggle {
+        margin-left: auto;
+    }
+    
+    .main-navigation .has-submenu.mobile-submenu-open .submenu-toggle {
+        transform: rotate(180deg);
     }
     
     .hero-title {
