@@ -48,6 +48,7 @@
                         'theme_location' => 'primary',
                         'menu_id'        => 'primary-menu',
                         'fallback_cb'    => 'theme1_fallback_menu',
+                        'walker'         => new Theme1_Walker_Nav_Menu(),
                     ));
                     ?>
                 </nav>
