@@ -66,12 +66,13 @@
         function initHeroSlideshow() {
             var $heroSection = $('.hero-section[data-slideshow="true"]');
             
-            if ($heroSection.length && $heroSection.data('images')) {
-                var images = $heroSection.data('images');
+            if ($heroSection.length && $heroSection.data('media')) {
+                var mediaItems = $heroSection.data('media');
                 var speed = $heroSection.data('speed') || 5000;
                 var transition = $heroSection.data('transition') || 'fade';
                 var currentSlide = 0;
                 var slideshowInterval;
+                var $videoContainer = $heroSection.find('.hero-video-container');
                 
                 // Create overlay div for fade transitions
                 if (transition === 'fade') {
@@ -81,47 +82,125 @@
                     }
                 }
                 
-                // Set initial background
-                if (images.length > 0) {
-                    $heroSection.css('background-image', 'url(' + images[0] + ')');
+                // Helper function to get video embed info (similar to PHP function)
+                function getVideoEmbedInfo(videoUrl) {
+                    if (!videoUrl) return false;
+                    
+                    // YouTube detection
+                    var youtubeMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                    if (youtubeMatch) {
+                        return {
+                            type: 'youtube',
+                            id: youtubeMatch[1],
+                            embed_url: 'https://www.youtube.com/embed/' + youtubeMatch[1] + '?autoplay=1&mute=1&loop=1&playlist=' + youtubeMatch[1] + '&controls=0&showinfo=0&rel=0&modestbranding=1'
+                        };
+                    }
+                    
+                    // Vimeo detection
+                    var vimeoMatch = videoUrl.match(/(?:vimeo\.com\/)(\d+)/);
+                    if (vimeoMatch) {
+                        return {
+                            type: 'vimeo',
+                            id: vimeoMatch[1],
+                            embed_url: 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1&muted=1&loop=1&background=1&controls=0'
+                        };
+                    }
+                    
+                    // Direct video file
+                    var videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
+                    var pathParts = videoUrl.split('.');
+                    var extension = pathParts[pathParts.length - 1].toLowerCase();
+                    if (videoExtensions.indexOf(extension) !== -1) {
+                        return {
+                            type: 'direct',
+                            url: videoUrl
+                        };
+                    }
+                    
+                    return false;
+                }
+                
+                // Function to create video element
+                function createVideoElement(videoInfo) {
+                    if (videoInfo.type === 'direct') {
+                        return '<video class="hero-video" autoplay muted loop playsinline><source src="' + videoInfo.url + '" type="video/mp4"></video>';
+                    } else {
+                        return '<iframe class="hero-video" src="' + videoInfo.embed_url + '" frameborder="0" allow="autoplay; fullscreen"></iframe>';
+                    }
+                }
+                
+                // Set initial media
+                if (mediaItems.length > 0) {
+                    var firstMedia = mediaItems[0];
+                    if (firstMedia.type === 'video') {
+                        var videoInfo = getVideoEmbedInfo(firstMedia.url);
+                        if (videoInfo) {
+                            $videoContainer.html(createVideoElement(videoInfo)).show();
+                            $heroSection.css('background-image', 'none');
+                        }
+                    } else {
+                        $heroSection.css('background-image', 'url(' + firstMedia.url + ')');
+                        $videoContainer.hide();
+                    }
                 }
                 
                 // Transition function
                 function transitionToSlide(slideIndex) {
+                    var mediaItem = mediaItems[slideIndex];
                     var $overlay = $heroSection.find('.slideshow-overlay');
                     
-                    switch (transition) {
-                        case 'fade':
-                            if ($overlay.length) {
-                                $overlay.css({
-                                    'background-image': 'url(' + images[slideIndex] + ')',
-                                    'opacity': 0
-                                }).animate({
-                                    opacity: 1
-                                }, 800, function() {
-                                    $heroSection.css('background-image', 'url(' + images[slideIndex] + ')');
-                                    $overlay.css('opacity', 0);
-                                });
-                            } else {
-                                $heroSection.css('background-image', 'url(' + images[slideIndex] + ')');
+                    if (mediaItem.type === 'video') {
+                        var videoInfo = getVideoEmbedInfo(mediaItem.url);
+                        if (videoInfo) {
+                            // Handle video transition
+                            switch (transition) {
+                                case 'fade':
+                                    $videoContainer.fadeOut(400, function() {
+                                        $(this).html(createVideoElement(videoInfo)).fadeIn(400);
+                                        $heroSection.css('background-image', 'none');
+                                    });
+                                    break;
+                                default:
+                                    $videoContainer.html(createVideoElement(videoInfo)).show();
+                                    $heroSection.css('background-image', 'none');
                             }
-                            break;
-                        case 'slide':
-                            // For slide transition, we'll use a simple fade for now
-                            // as CSS-only slide transitions are complex for background images
-                            $heroSection.fadeOut(400, function() {
-                                $(this).css('background-image', 'url(' + images[slideIndex] + ')').fadeIn(400);
-                            });
-                            break;
-                        default:
-                            // No transition
-                            $heroSection.css('background-image', 'url(' + images[slideIndex] + ')');
+                        }
+                    } else {
+                        // Handle image transition
+                        switch (transition) {
+                            case 'fade':
+                                if ($overlay.length) {
+                                    $videoContainer.fadeOut(400);
+                                    $overlay.css({
+                                        'background-image': 'url(' + mediaItem.url + ')',
+                                        'opacity': 0
+                                    }).animate({
+                                        opacity: 1
+                                    }, 800, function() {
+                                        $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
+                                        $overlay.css('opacity', 0);
+                                    });
+                                } else {
+                                    $videoContainer.fadeOut(400);
+                                    $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
+                                }
+                                break;
+                            case 'slide':
+                                $videoContainer.fadeOut(400);
+                                $heroSection.fadeOut(400, function() {
+                                    $(this).css('background-image', 'url(' + mediaItem.url + ')').fadeIn(400);
+                                });
+                                break;
+                            default:
+                                $videoContainer.hide();
+                                $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
+                        }
                     }
                 }
                 
                 // Auto-advance slideshow
                 function nextSlide() {
-                    currentSlide = (currentSlide + 1) % images.length;
+                    currentSlide = (currentSlide + 1) % mediaItems.length;
                     transitionToSlide(currentSlide);
                     
                     // Update indicators
@@ -129,8 +208,8 @@
                     $('.slideshow-indicators .indicator').eq(currentSlide).addClass('active');
                 }
                 
-                // Start slideshow if multiple images
-                if (images.length > 1) {
+                // Start slideshow if multiple media items
+                if (mediaItems.length > 1) {
                     slideshowInterval = setInterval(nextSlide, speed);
                     
                     // Manual control via indicators

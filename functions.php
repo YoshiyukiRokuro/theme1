@@ -151,6 +151,45 @@ function theme1_customize_register($wp_customize) {
         'settings' => 'hero_background_image_3',
     )));
     
+    // Hero Video 1
+    $wp_customize->add_setting('hero_background_video', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    
+    $wp_customize->add_control('hero_background_video', array(
+        'label'       => __('Hero Background Video 1 URL', 'theme1'),
+        'section'     => 'hero_image_section',
+        'type'        => 'url',
+        'description' => __('Enter a video URL (MP4, WebM) or YouTube/Vimeo URL. If both image and video are set, video will take priority.', 'theme1'),
+    ));
+    
+    // Hero Video 2
+    $wp_customize->add_setting('hero_background_video_2', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    
+    $wp_customize->add_control('hero_background_video_2', array(
+        'label'       => __('Hero Background Video 2 URL', 'theme1'),
+        'section'     => 'hero_image_section',
+        'type'        => 'url',
+        'description' => __('Enter a video URL (MP4, WebM) or YouTube/Vimeo URL. If both image and video are set, video will take priority.', 'theme1'),
+    ));
+    
+    // Hero Video 3
+    $wp_customize->add_setting('hero_background_video_3', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    
+    $wp_customize->add_control('hero_background_video_3', array(
+        'label'       => __('Hero Background Video 3 URL', 'theme1'),
+        'section'     => 'hero_image_section',
+        'type'        => 'url',
+        'description' => __('Enter a video URL (MP4, WebM) or YouTube/Vimeo URL. If both image and video are set, video will take priority.', 'theme1'),
+    ));
+    
     // Slideshow Settings
     $wp_customize->add_section('hero_slideshow_section', array(
         'title'       => __('Hero Slideshow Settings', 'theme1'),
@@ -479,19 +518,38 @@ add_action('customize_register', 'theme1_customize_register');
  */
 function theme1_get_hero_data() {
     $images = array();
+    $videos = array();
+    $media_items = array(); // Combined media items (images and videos)
     
-    // Collect all hero images
+    // Collect all hero images and videos
     for ($i = 1; $i <= 3; $i++) {
         $image_key = $i === 1 ? 'hero_background_image' : 'hero_background_image_' . $i;
+        $video_key = $i === 1 ? 'hero_background_video' : 'hero_background_video_' . $i;
+        
         $image_url = get_theme_mod($image_key, '');
-        if (!empty($image_url)) {
+        $video_url = get_theme_mod($video_key, '');
+        
+        // If video is set, prioritize it; otherwise use image
+        if (!empty($video_url)) {
+            $videos[] = $video_url;
+            $media_items[] = array(
+                'type' => 'video',
+                'url' => $video_url
+            );
+        } elseif (!empty($image_url)) {
             $images[] = $image_url;
+            $media_items[] = array(
+                'type' => 'image',
+                'url' => $image_url
+            );
         }
     }
     
     return array(
         'background_image'       => get_theme_mod('hero_background_image', ''),
         'background_images'      => $images,
+        'background_videos'      => $videos,
+        'media_items'            => $media_items,
         'slideshow_enable'       => get_theme_mod('hero_slideshow_enable', false),
         'slideshow_speed'        => get_theme_mod('hero_slideshow_speed', 5000),
         'slideshow_transition'   => get_theme_mod('hero_slideshow_transition', 'fade'),
@@ -500,6 +558,45 @@ function theme1_get_hero_data() {
         'cta_text'               => get_theme_mod('hero_cta_text', __('Learn More', 'theme1')),
         'cta_url'                => get_theme_mod('hero_cta_url', '#about'),
     );
+}
+
+/**
+ * Get video embed information
+ */
+function theme1_get_video_embed_info($video_url) {
+    if (empty($video_url)) {
+        return false;
+    }
+    
+    // YouTube detection
+    if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $video_url, $match)) {
+        return array(
+            'type' => 'youtube',
+            'id' => $match[1],
+            'embed_url' => 'https://www.youtube.com/embed/' . $match[1] . '?autoplay=1&mute=1&loop=1&playlist=' . $match[1] . '&controls=0&showinfo=0&rel=0&modestbranding=1'
+        );
+    }
+    
+    // Vimeo detection
+    if (preg_match('/(?:vimeo\.com\/)(\d+)/', $video_url, $match)) {
+        return array(
+            'type' => 'vimeo',
+            'id' => $match[1],
+            'embed_url' => 'https://player.vimeo.com/video/' . $match[1] . '?autoplay=1&muted=1&loop=1&background=1&controls=0'
+        );
+    }
+    
+    // Direct video file (MP4, WebM, etc.)
+    $video_extensions = array('mp4', 'webm', 'ogg', 'mov', 'avi');
+    $path_info = pathinfo(parse_url($video_url, PHP_URL_PATH));
+    if (isset($path_info['extension']) && in_array(strtolower($path_info['extension']), $video_extensions)) {
+        return array(
+            'type' => 'direct',
+            'url' => $video_url
+        );
+    }
+    
+    return false;
 }
 
 /**

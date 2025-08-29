@@ -12,14 +12,48 @@ $hero_data = theme1_get_hero_data();
 
 <!-- Hero Section -->
 <section class="hero-section full-width" 
-    <?php if ($hero_data['slideshow_enable'] && count($hero_data['background_images']) > 1) : ?>
+    <?php if ($hero_data['slideshow_enable'] && count($hero_data['media_items']) > 1) : ?>
         data-slideshow="true" 
         data-speed="<?php echo esc_attr($hero_data['slideshow_speed']); ?>"
         data-transition="<?php echo esc_attr($hero_data['slideshow_transition']); ?>"
-        data-images="<?php echo esc_attr(json_encode($hero_data['background_images'])); ?>"
+        data-media="<?php echo esc_attr(json_encode($hero_data['media_items'])); ?>"
     <?php else : ?>
-        style="<?php echo $hero_data['background_image'] ? 'background-image: url(' . esc_url($hero_data['background_image']) . ');' : ''; ?>"
+        <?php
+        // Single media item handling
+        $first_media = !empty($hero_data['media_items']) ? $hero_data['media_items'][0] : null;
+        if ($first_media && $first_media['type'] === 'video') {
+            $video_info = theme1_get_video_embed_info($first_media['url']);
+            if ($video_info) {
+                echo 'data-single-video="true" data-video-info="' . esc_attr(json_encode($video_info)) . '"';
+            }
+        } elseif ($hero_data['background_image']) {
+            echo 'style="background-image: url(' . esc_url($hero_data['background_image']) . ');"';
+        }
+        ?>
     <?php endif; ?>>
+    
+    <?php
+    // Add video elements for single video or slideshow
+    if ($hero_data['slideshow_enable'] && count($hero_data['media_items']) > 1) {
+        // Slideshow mode - videos will be handled by JavaScript
+        echo '<div class="hero-video-container" style="display: none;"></div>';
+    } elseif (!empty($hero_data['media_items']) && $hero_data['media_items'][0]['type'] === 'video') {
+        // Single video mode
+        $video_info = theme1_get_video_embed_info($hero_data['media_items'][0]['url']);
+        if ($video_info) {
+            echo '<div class="hero-video-container">';
+            if ($video_info['type'] === 'direct') {
+                echo '<video class="hero-video" autoplay muted loop playsinline>';
+                echo '<source src="' . esc_url($video_info['url']) . '" type="video/mp4">';
+                echo '</video>';
+            } else {
+                echo '<iframe class="hero-video" src="' . esc_url($video_info['embed_url']) . '" frameborder="0" allow="autoplay; fullscreen"></iframe>';
+            }
+            echo '</div>';
+        }
+    }
+    ?>
+    
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title"><?php echo esc_html($hero_data['title']); ?></h1>
@@ -28,9 +62,9 @@ $hero_data = theme1_get_hero_data();
         </div>
     </div>
     
-    <?php if ($hero_data['slideshow_enable'] && count($hero_data['background_images']) > 1) : ?>
+    <?php if ($hero_data['slideshow_enable'] && count($hero_data['media_items']) > 1) : ?>
         <div class="slideshow-indicators">
-            <?php foreach ($hero_data['background_images'] as $index => $image) : ?>
+            <?php foreach ($hero_data['media_items'] as $index => $media) : ?>
                 <button class="indicator <?php echo $index === 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>"></button>
             <?php endforeach; ?>
         </div>
