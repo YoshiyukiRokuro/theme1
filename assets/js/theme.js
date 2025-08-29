@@ -179,22 +179,21 @@
                             case 'fade':
                                 if ($overlay.length) {
                                     $videoContainer.fadeOut(400);
-                                    // Get current background image for smooth transition
-                                    var currentBgImage = $heroSection.css('background-image');
                                     
-                                    // Set overlay to current image and make it visible
+                                    // Set overlay to new image and start with opacity 0
                                     $overlay.css({
-                                        'background-image': currentBgImage,
-                                        'opacity': 1
+                                        'background-image': 'url(' + mediaItem.url + ')',
+                                        'opacity': 0
                                     });
                                     
-                                    // Update hero section to new image (hidden behind overlay)
-                                    $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
-                                    
-                                    // Fade out overlay to reveal new image
+                                    // Fade in overlay (new image) to create cross-fade effect
                                     $overlay.animate({
-                                        opacity: 0
-                                    }, 800);
+                                        opacity: 1
+                                    }, 800, function() {
+                                        // After animation completes, update hero section and reset overlay
+                                        $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
+                                        $overlay.css('opacity', 0);
+                                    });
                                 } else {
                                     $videoContainer.fadeOut(400);
                                     $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
