@@ -137,6 +137,10 @@
                         if (videoInfo) {
                             $videoContainer.html(createVideoElement(videoInfo)).show();
                             $heroSection.css('background-image', 'none');
+                        } else {
+                            // Fallback to background color if video fails
+                            $heroSection.css('background-image', 'none');
+                            $videoContainer.hide();
                         }
                     } else {
                         $heroSection.css('background-image', 'url(' + firstMedia.url + ')');
@@ -164,6 +168,10 @@
                                     $videoContainer.html(createVideoElement(videoInfo)).show();
                                     $heroSection.css('background-image', 'none');
                             }
+                        } else {
+                            // Fallback to hiding video if URL is invalid
+                            $videoContainer.fadeOut(400);
+                            $heroSection.css('background-image', 'none');
                         }
                     } else {
                         // Handle image transition
