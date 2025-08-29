@@ -179,15 +179,22 @@
                             case 'fade':
                                 if ($overlay.length) {
                                     $videoContainer.fadeOut(400);
+                                    // Get current background image for smooth transition
+                                    var currentBgImage = $heroSection.css('background-image');
+                                    
+                                    // Set overlay to current image and make it visible
                                     $overlay.css({
-                                        'background-image': 'url(' + mediaItem.url + ')',
-                                        'opacity': 0
-                                    }).animate({
-                                        opacity: 1
-                                    }, 800, function() {
-                                        $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
-                                        $overlay.css('opacity', 0);
+                                        'background-image': currentBgImage,
+                                        'opacity': 1
                                     });
+                                    
+                                    // Update hero section to new image (hidden behind overlay)
+                                    $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
+                                    
+                                    // Fade out overlay to reveal new image
+                                    $overlay.animate({
+                                        opacity: 0
+                                    }, 800);
                                 } else {
                                     $videoContainer.fadeOut(400);
                                     $heroSection.css('background-image', 'url(' + mediaItem.url + ')');
